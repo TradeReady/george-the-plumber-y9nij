@@ -15,10 +15,18 @@ export default function Template3Site({ site, imagePack }) {
   const services = (gc.services || []).slice(0, 6);
   const testimonials = (gc.testimonials || []).slice(0, 3);
   const benefits = (gc.benefits || []).slice(0, 4);
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
@@ -73,19 +81,41 @@ export default function Template3Site({ site, imagePack }) {
   return (
     <div style={{ fontFamily:'system-ui,sans-serif', backgroundColor:bg, color:textColor }}>
       {/* NAV */}
-      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:50, backgroundColor:textColor, height:56, display:'flex', alignItems:'center', borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
-        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%' }}>
+      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:50, backgroundColor:textColor, borderBottom:'1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', height:56 }}>
           {logoUrl ? <img src={logoUrl} alt={businessName} style={{ height:32, objectFit:'contain' }} /> : <span style={{ fontWeight:900, color:'#fff', fontSize:'1.15rem' }}>{businessName}</span>}
-          <div style={{ display:'flex', alignItems:'center', gap:4 }}>
-            {[['Services','#services'],['About','#about'],['Reviews','#testimonials'],['Contact','#contact']].map(([l,h])=>(
-              <a key={h} href={h} style={{ padding:'8px 16px', fontSize:'0.875rem', fontWeight:600, color:'rgba(255,255,255,0.6)' }}>{l}</a>
-            ))}
-          </div>
+          {/* Desktop links */}
+          {!isMobile && (
+            <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+              {[['Services','#services'],['About','#about'],['Reviews','#testimonials'],['Contact','#contact']].map(([l,h])=>(
+                <a key={h} href={h} style={{ padding:'8px 16px', fontSize:'0.875rem', fontWeight:600, color:'rgba(255,255,255,0.6)', textDecoration:'none' }}>{l}</a>
+              ))}
+            </div>
+          )}
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px', fontSize:'0.875rem', fontWeight:900, color:'#fff', backgroundColor:primary, borderRadius:buttonRadius }}><Phone size={14} /> Call Now</a>}
-            <a href="#contact" style={{ padding:'8px 20px', fontSize:'0.875rem', fontWeight:900, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:buttonRadius }}>Free Quote →</a>
+            {!isMobile && gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px', fontSize:'0.875rem', fontWeight:900, color:'#fff', backgroundColor:primary, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
+            {!isMobile && <a href="#contact" style={{ padding:'8px 20px', fontSize:'0.875rem', fontWeight:900, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:buttonRadius, textDecoration:'none' }}>Free Quote →</a>}
+            {/* Hamburger */}
+            {isMobile && (
+              <button onClick={() => setMenuOpen(v => !v)} style={{ background:'none', border:'none', cursor:'pointer', padding:8, color:'#fff', display:'flex', alignItems:'center' }}>
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            )}
           </div>
         </div>
+        {/* Mobile dropdown */}
+        {isMobile && menuOpen && (
+          <div style={{ backgroundColor:textColor, borderTop:'1px solid rgba(255,255,255,0.1)', padding:'16px 24px', display:'flex', flexDirection:'column', gap:4 }}>
+            {[['Services','#services'],['About','#about'],['Reviews','#testimonials'],['Contact','#contact']].map(([l,h]) => (
+              <a key={h} href={h} onClick={() => setMenuOpen(false)}
+                style={{ fontSize:'1rem', color:'rgba(255,255,255,0.85)', textDecoration:'none', padding:'12px 0', borderBottom:'1px solid rgba(255,255,255,0.08)', fontWeight:600 }}>{l}</a>
+            ))}
+            <div style={{ paddingTop:12, display:'flex', flexDirection:'column', gap:8 }}>
+              {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'12px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:900, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
+              <a href="#contact" onClick={() => setMenuOpen(false)} style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'12px', color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:buttonRadius, textDecoration:'none', fontSize:'0.875rem', fontWeight:900 }}>Free Quote →</a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
