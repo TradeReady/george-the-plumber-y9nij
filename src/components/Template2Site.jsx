@@ -19,32 +19,47 @@ export default function Template2Site({ site, imagePack }) {
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
 
-  function CountUp({ value }) {
+  function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
     const [display, setDisplay] = useState('0');
-    const started = useRef(false);
+    const rafRef = useRef(null);
+    const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
-      const el = ref.current; if (!el) return;
-      const observer = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
-          const isFloat = match[2].includes('.');
-          const steps = 50; const stepTime = 1500 / steps; let step = 0;
-          const timer = setInterval(() => {
-            step++;
-            const cur = (num * step) / steps;
-            if (step >= steps) { clearInterval(timer); setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`); }
-            else { setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`); }
-          }, stepTime);
-        }
-      }, { threshold: 0.3 });
-      observer.observe(el);
-      return () => observer.disconnect();
-    }, [value]);
+      const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+      const isFloat = match[2].includes('.');
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplay(`${prefix}0${suffix}`);
+      const easeOut = t => 1 - Math.pow(1 - t, 3);
+      const startAnimation = () => {
+        const startTime = performance.now();
+        const tick = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = num * easeOut(progress);
+          if (progress < 1) {
+            setDisplay(`${prefix}${isFloat ? current.toFixed(1) : Math.floor(current)}${suffix}`);
+            rafRef.current = requestAnimationFrame(tick);
+          } else {
+            setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`);
+          }
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      if (observerRef.current) observerRef.current.disconnect();
+      const el = ref.current;
+      if (!el) return;
+      observerRef.current = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) { observerRef.current.disconnect(); startAnimation(); }
+      }, { threshold: 0.2 });
+      observerRef.current.observe(el);
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        if (observerRef.current) observerRef.current.disconnect();
+      };
+    }, [value, duration]);
     return <span ref={ref}>{display}</span>;
   }
 
@@ -86,7 +101,7 @@ export default function Template2Site({ site, imagePack }) {
               <span style={{ fontSize:'0.75rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:primary }}>{gc.tagline}</span>
             </motion.div>
           )}
-          <motion.h1 initial={{ opacity:0, x:-30 }} animate={{ opacity:1, x:0 }} transition={{ delay:0.1 }} style={{ fontSize:'clamp(2rem,4vw,3.5rem)', fontWeight:800, color:textColor, lineHeight:1.1, marginBottom:24 }}>{gc.headline||businessName}</motion.h1>
+          <motion.h1 initial={{ opacity:0, x:-30 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.8, delay:0.1, ease:[0.2,0.8,0.2,1] }} style={{ fontSize:'clamp(2rem,4vw,3.5rem)', fontWeight:800, color:textColor, lineHeight:1.1, marginBottom:24 }}>{gc.headline||businessName}</motion.h1>
           <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }} transition={{ delay:0.2 }} style={{ fontSize:'1rem', color:'#6b7280', lineHeight:1.6, maxWidth:420, marginBottom:32 }}>{gc.subheadline}</motion.p>
           {benefits.slice(0,3).length > 0 && (
             <ul style={{ listStyle:'none', margin:'0 0 32px', padding:0 }}>
@@ -140,7 +155,7 @@ export default function Template2Site({ site, imagePack }) {
               {(showAllServices ? services : services.slice(0,3)).map((svc,i)=>{
                 const img=(site.service_image_urls||[])[i]||(imagePack?.service_image_urls||[])[i];
                 return (
-                  <motion.div key={i} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }} viewport={{ once:true }} transition={{ delay:i*0.06 }}
+                  <motion.div key={i} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }} viewport={{ once:true }} transition={{ duration:0.7, delay:i*0.1, ease:[0.2,0.8,0.2,1] }}
                     style={{ background:'#f9fafb', borderRadius:20, padding:24, position:'relative', overflow:'hidden' }}>
                     {img ? <div style={{ height:200, borderRadius:16, overflow:'hidden', marginBottom:16 }}><img src={img} alt={svc.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} /></div>
                       : <div style={{ width:48, height:48, borderRadius:12, background:primary, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16, color:'#fff' }}>
@@ -205,7 +220,7 @@ export default function Template2Site({ site, imagePack }) {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:24 }}>
             {testimonials.map((t,i)=>(
-              <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.1 }}
+              <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay:i*0.12, ease:[0.2,0.8,0.2,1] }}
                 style={{ background:'#f9fafb', borderRadius:20, padding:24, border:'1px solid #f3f4f6' }}>
                 <Quote size={32} style={{ color:primary, opacity:0.2, marginBottom:16 }} />
                 <p style={{ fontSize:'0.875rem', color:'#4b5563', lineHeight:1.7, marginBottom:24 }}>"{t.text}"</p>
