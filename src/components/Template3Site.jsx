@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, CheckCircle2, Menu, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, Mail, MapPin, CheckCircle2, Menu, X, ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function Template3Site({ site, imagePack }) {
   const gc = site.generated_content || {};
@@ -16,8 +16,38 @@ export default function Template3Site({ site, imagePack }) {
   const testimonials = (gc.testimonials || []).slice(0, 3);
   const benefits = (gc.benefits || []).slice(0, 4);
   const [open, setOpen] = useState(false);
+  const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
+
+  function CountUp({ value }) {
+    const ref = useRef(null);
+    const [display, setDisplay] = useState('0');
+    const started = useRef(false);
+    useEffect(() => {
+      const str = String(value);
+      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      if (!match) { setDisplay(str); return; }
+      const el = ref.current; if (!el) return;
+      const observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+          const isFloat = match[2].includes('.');
+          const steps = 50; const stepTime = 1500 / steps; let step = 0;
+          const timer = setInterval(() => {
+            step++;
+            const cur = (num * step) / steps;
+            if (step >= steps) { clearInterval(timer); setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`); }
+            else { setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`); }
+          }, stepTime);
+        }
+      }, { threshold: 0.3 });
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, [value]);
+    return <span ref={ref}>{display}</span>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,9 +86,9 @@ export default function Template3Site({ site, imagePack }) {
             </motion.div>
           </div>
           <div style={{ display:'flex', gap:40, paddingTop:32, borderTop:'1px solid #d1d5db', marginTop:40 }}>
-            {[{ n: gc.years_in_business ? gc.years_in_business+' years' : '10 years', l:'Years' },{ n:gc.rating||'4.9', l:'Star Rating' },{ n:gc.review_count ? gc.review_count+' reviews' : '50 reviews', l:'Reviews' }].map((s,i)=>(
+            {[{ n: gc.years_in_business ? gc.years_in_business+'+' : '10+', l:'Years' },{ n:gc.rating||'4.9', l:'Star Rating' },{ n:gc.review_count ? gc.review_count+'+' : '50+', l:'Reviews' }].map((s,i)=>(
               <div key={i}>
-                <div style={{ fontSize:'1.5rem', fontWeight:900, color:'#111827', letterSpacing:'-0.02em' }}>{s.n}</div>
+                <div style={{ fontSize:'1.5rem', fontWeight:900, color:'#111827', letterSpacing:'-0.02em' }}><CountUp value={s.n} /></div>
                 <div style={{ fontSize:'0.7rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', color:'#9ca3af', marginTop:2 }}>{s.l}</div>
               </div>
             ))}
@@ -81,29 +111,41 @@ export default function Template3Site({ site, imagePack }) {
           <a href="#contact" style={{ fontSize:'0.75rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.15em', color:primary }}>Book Any Service →</a>
         </div>
         <div style={{ borderTop:'1px solid #e5e7eb' }}>
-          {services.map((svc, i) => {
-            const uploadedImg = site.service_image_urls?.[i];
-            const imgUrl = (uploadedImg && uploadedImg !== 'none') ? uploadedImg : imagePack?.service_image_urls?.[i];
-            return (
-              <motion.div key={i} initial={{ opacity:0 }} whileInView={{ opacity:1 }} viewport={{ once:true }} transition={{ delay:i*0.05 }}
-                style={{ display:'flex', alignItems:'center', backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', cursor:'pointer', transition:'background-color 0.3s' }}
-                onMouseEnter={e=>e.currentTarget.style.backgroundColor=primary}
-                onMouseLeave={e=>e.currentTarget.style.backgroundColor='#fff'}>
-                <div style={{ width:96, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 0', borderRight:'1px solid #f3f4f6' }}>
-                  <span style={{ fontSize:'2rem', fontWeight:900, color:'#e5e7eb', letterSpacing:'-0.04em' }}>{String(i+1).padStart(2,'0')}</span>
-                </div>
-                <div style={{ flex:1, padding:32 }}>
-                  <h3 style={{ fontSize:'1.1rem', fontWeight:900, color:'#111827', margin:'0 0 6px' }}>{svc.title}</h3>
-                  <p style={{ fontSize:'0.875rem', color:'#6b7280', margin:0, lineHeight:1.6, maxWidth:480 }}>{svc.description}</p>
-                </div>
-                {imgUrl && <div style={{ width:128, flexShrink:0, overflow:'hidden' }}><img src={imgUrl} alt={svc.title} style={{ width:128, height:96, objectFit:'cover' }} /></div>}
-                <div style={{ width:64, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                  <span style={{ fontSize:'1.25rem', color:'#d1d5db' }}>→</span>
-                </div>
-              </motion.div>
-            );
-          })}
+          <AnimatePresence>
+            {(showAllServices ? services : services.slice(0,3)).map((svc, i) => {
+              const uploadedImg = site.service_image_urls?.[i];
+              const imgUrl = (uploadedImg && uploadedImg !== 'none') ? uploadedImg : imagePack?.service_image_urls?.[i];
+              return (
+                <motion.div key={i} initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }} viewport={{ once:true }} transition={{ delay:i*0.05 }}
+                  style={{ display:'flex', alignItems:'center', backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', cursor:'pointer', transition:'background-color 0.3s' }}
+                  onMouseEnter={e=>e.currentTarget.style.backgroundColor=primary}
+                  onMouseLeave={e=>e.currentTarget.style.backgroundColor='#fff'}>
+                  <div style={{ width:96, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 0', borderRight:'1px solid #f3f4f6' }}>
+                    <span style={{ fontSize:'2rem', fontWeight:900, color:'#e5e7eb', letterSpacing:'-0.04em' }}>{String(i+1).padStart(2,'0')}</span>
+                  </div>
+                  <div style={{ flex:1, padding:32 }}>
+                    <h3 style={{ fontSize:'1.1rem', fontWeight:900, color:'#111827', margin:'0 0 6px' }}>{svc.title}</h3>
+                    <p style={{ fontSize:'0.875rem', color:'#6b7280', margin:0, lineHeight:1.6, maxWidth:480 }}>{svc.description}</p>
+                  </div>
+                  {imgUrl && <div style={{ width:128, flexShrink:0, overflow:'hidden' }}><img src={imgUrl} alt={svc.title} style={{ width:128, height:96, objectFit:'cover' }} /></div>}
+                  <div style={{ width:64, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <span style={{ fontSize:'1.25rem', color:'#d1d5db' }}>→</span>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
+        {services.length > 3 && (
+          <div style={{ textAlign:'center', padding:'32px 0', backgroundColor:'#fff', borderTop:'1px solid #e5e7eb' }}>
+            <button onClick={() => setShowAllServices(v => !v)}
+              style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:9999, border:`2px solid ${primary}`, backgroundColor:'transparent', color:primary, fontWeight:700, fontSize:'0.875rem', cursor:'pointer' }}>
+              {showAllServices
+                ? <><ChevronUp size={16} />Show Less</>
+                : <><ChevronDown size={16} />See All Services</>}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* ABOUT */}
