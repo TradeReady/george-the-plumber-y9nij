@@ -14,10 +14,18 @@ export default function Template2Site({ site, imagePack }) {
   const services = gc.services || [];
   const testimonials = gc.testimonials || [];
   const benefits = gc.benefits || [];
-  const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
@@ -74,22 +82,44 @@ export default function Template2Site({ site, imagePack }) {
   return (
     <div style={{ fontFamily:'system-ui,sans-serif', backgroundColor:'#fafafa', color:textColor }}>
       {/* NAV */}
-      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, background:'#fff', borderBottom:'1px solid #f3f4f6', boxShadow:'0 1px 3px rgba(0,0,0,0.06)', height:64, display:'flex', alignItems:'center' }}>
-        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%' }}>
+      <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, background:'#fff', borderBottom:'1px solid #f3f4f6', boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', width:'100%', height:64 }}>
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             {logoUrl ? <img src={logoUrl} alt={businessName} style={{ height:36, objectFit:'contain' }} /> : <>
               <div style={{ width:32, height:32, borderRadius:8, background:primary, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700 }}>{businessName.charAt(0)}</div>
               <span style={{ fontWeight:700, color:'#111827' }}>{businessName}</span>
             </>}
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:32 }} className="hidden-mobile">
-            {navLinks.map(([l,h])=><a key={h} href={h} style={{ fontSize:'0.875rem', fontWeight:500, color:'#4b5563' }}>{l}</a>)}
-          </div>
+          {/* Desktop nav */}
+          {!isMobile && (
+            <div style={{ display:'flex', alignItems:'center', gap:32 }}>
+              {navLinks.map(([l,h])=><a key={h} href={h} style={{ fontSize:'0.875rem', fontWeight:500, color:'#4b5563', textDecoration:'none' }}>{l}</a>)}
+            </div>
+          )}
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 20px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius }}><Phone size={14} /> Call Now</a>}
-            <a href="#contact" style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'8px 20px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius }}>{gc.cta_text||'Get a Quote'} <ChevronRight size={14} /></a>
+            {!isMobile && gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 20px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
+            {!isMobile && <a href="#contact" style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'8px 20px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>{gc.cta_text||'Get a Quote'} <ChevronRight size={14} /></a>}
+            {/* Hamburger */}
+            {isMobile && (
+              <button onClick={() => setMenuOpen(v => !v)} style={{ background:'none', border:'none', cursor:'pointer', padding:8, display:'flex', alignItems:'center', color:'#374151' }}>
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            )}
           </div>
         </div>
+        {/* Mobile dropdown */}
+        {isMobile && menuOpen && (
+          <div style={{ backgroundColor:'#fff', borderTop:'1px solid #f3f4f6', padding:'16px 24px', display:'flex', flexDirection:'column', gap:4 }}>
+            {navLinks.map(([l,h]) => (
+              <a key={h} href={h} onClick={() => setMenuOpen(false)}
+                style={{ fontSize:'1rem', color:'#374151', textDecoration:'none', padding:'12px 0', borderBottom:'1px solid #f3f4f6', fontWeight:500 }}>{l}</a>
+            ))}
+            <div style={{ paddingTop:12, display:'flex', flexDirection:'column', gap:8 }}>
+              {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'12px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
+              <a href="#contact" onClick={() => setMenuOpen(false)} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4, padding:'12px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>{gc.cta_text||'Get a Quote'}</a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* HERO */}
