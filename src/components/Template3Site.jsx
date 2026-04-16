@@ -261,8 +261,8 @@ export default function Template3Site({ site, imagePack }) {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" style={{ display:'flex', flexDirection:'row', minHeight:600 }}>
-        <motion.div initial={{ opacity:0, x:-20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ width:'40%', backgroundColor:'#030712', padding:'64px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
+      <section id="contact" style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'auto' : 600, overflow:'hidden' }}>
+        <motion.div initial={{ opacity:0, x:-20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ width: isMobile ? '100%' : '40%', backgroundColor:'#030712', padding: isMobile ? '40px 16px' : '64px', display:'flex', flexDirection:'column', justifyContent:'space-between' }}>
           <div>
             <div style={{ fontSize:'0.7rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.3em', color:primary, marginBottom:24 }}>Contact</div>
             <h2 style={{ fontSize:'2.5rem', fontWeight:900, color:'#fff', lineHeight:1.05, letterSpacing:'-0.03em', marginBottom:24 }}>Get Your<br />Free Quote</h2>
@@ -280,7 +280,7 @@ export default function Template3Site({ site, imagePack }) {
             </div>
           </div>
         </motion.div>
-        <motion.div initial={{ opacity:0, x:20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ flex:1, backgroundColor:'#fff', padding:'64px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
+        <motion.div initial={{ opacity:0, x:20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ flex:1, backgroundColor:'#fff', padding: isMobile ? '40px 16px' : '64px', display:'flex', flexDirection:'column', justifyContent:'center' }}>
           {submitted ? (
             <div style={{ textAlign:'center', padding:64 }}>
               <div style={{ fontSize:'4rem', fontWeight:900, color:primary, marginBottom:16 }}>✓</div>
@@ -289,7 +289,7 @@ export default function Template3Site({ site, imagePack }) {
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:24 }}>
-              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:24 }}>
+              <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:24 }}>
                 {[['name','Full Name','text',true],['phone','Phone Number','tel',true]].map(([k,l,t,req])=>(
                   <div key={k}>
                     <label style={{ display:'block', fontSize:'0.7rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.15em', color:'#9ca3af', marginBottom:8 }}>{l}</label>
@@ -315,8 +315,8 @@ export default function Template3Site({ site, imagePack }) {
       </section>
 
       {/* FOOTER */}
-      <footer style={{ backgroundColor:'#fff', borderTop:`4px solid ${primary}`, padding:'48px 64px' }}>
-        <div style={{ display:'flex', flexWrap:'wrap', gap:48, justifyContent:'space-between', marginBottom:40 }}>
+      <footer style={{ backgroundColor:'#fff', borderTop:`4px solid ${primary}`, padding: isMobile ? '40px 16px' : '48px 64px' }}>
+        <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'auto auto auto', gap: isMobile ? 32 : 48, marginBottom:40 }}>
           <div style={{ maxWidth:280 }}>
             <span style={{ fontWeight:900, color:'#111827', fontSize:'1.25rem', display:'block', marginBottom:12 }}>{businessName}</span>
             <p style={{ color:'#9ca3af', fontSize:'0.875rem', lineHeight:1.6 }}>{gc.tagline}</p>
