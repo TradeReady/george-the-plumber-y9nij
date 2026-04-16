@@ -396,8 +396,8 @@ export default function Template1Site({ site, imagePack }) {
       </section>
 
       {/* ── CONTACT FORM ── */}
-      <section id="contact" style={{ padding:'80px 0', backgroundColor:'#fff' }}>
-        <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 24px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:48, alignItems:'start' }}>
+      <section id="contact" style={{ padding:'80px 0', backgroundColor:'#fff', overflow:'hidden' }}>
+        <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 16px', display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 48, alignItems:'start' }}>
           <motion.div initial={{ opacity:0, x:-20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
             <p style={{ fontSize:'0.75rem', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color:primary, marginBottom:8 }}>Contact Us</p>
             <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:textColor, marginBottom:16 }}>Get In Touch</h2>
@@ -448,8 +448,8 @@ export default function Template1Site({ site, imagePack }) {
 
       {/* ── FOOTER ── */}
       <footer style={{ backgroundColor:textColor, color:'rgba(255,255,255,0.7)', padding:'48px 0' }}>
-        <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 24px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr 1fr 1fr', gap:32, marginBottom:32 }}>
+        <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 16px' }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap:32, marginBottom:32 }}>
             <div>
               <div style={{ fontWeight:700, fontSize:'1.2rem', color:'#fff', marginBottom:12 }}>{businessName}</div>
               <p style={{ fontSize:'0.875rem', lineHeight:1.6 }}>{gc.tagline}</p>
