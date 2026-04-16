@@ -20,32 +20,47 @@ export default function Template3Site({ site, imagePack }) {
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
 
-  function CountUp({ value }) {
+  function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
     const [display, setDisplay] = useState('0');
-    const started = useRef(false);
+    const rafRef = useRef(null);
+    const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
-      const el = ref.current; if (!el) return;
-      const observer = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
-          const isFloat = match[2].includes('.');
-          const steps = 50; const stepTime = 1500 / steps; let step = 0;
-          const timer = setInterval(() => {
-            step++;
-            const cur = (num * step) / steps;
-            if (step >= steps) { clearInterval(timer); setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`); }
-            else { setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`); }
-          }, stepTime);
-        }
-      }, { threshold: 0.3 });
-      observer.observe(el);
-      return () => observer.disconnect();
-    }, [value]);
+      const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+      const isFloat = match[2].includes('.');
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplay(`${prefix}0${suffix}`);
+      const easeOut = t => 1 - Math.pow(1 - t, 3);
+      const startAnimation = () => {
+        const startTime = performance.now();
+        const tick = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = num * easeOut(progress);
+          if (progress < 1) {
+            setDisplay(`${prefix}${isFloat ? current.toFixed(1) : Math.floor(current)}${suffix}`);
+            rafRef.current = requestAnimationFrame(tick);
+          } else {
+            setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`);
+          }
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      if (observerRef.current) observerRef.current.disconnect();
+      const el = ref.current;
+      if (!el) return;
+      observerRef.current = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) { observerRef.current.disconnect(); startAnimation(); }
+      }, { threshold: 0.2 });
+      observerRef.current.observe(el);
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        if (observerRef.current) observerRef.current.disconnect();
+      };
+    }, [value, duration]);
     return <span ref={ref}>{display}</span>;
   }
 
@@ -183,7 +198,7 @@ export default function Template3Site({ site, imagePack }) {
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', borderTop:'1px solid #e5e7eb' }}>
           {testimonials.map((t, i) => (
-            <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.1 }}
+            <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay:i*0.12, ease:[0.2,0.8,0.2,1] }}
               style={{ padding:'40px 64px', backgroundColor:bg, borderRight: i<2 ? '1px solid #e5e7eb' : 'none' }}>
               <div style={{ fontSize:'7rem', fontWeight:900, lineHeight:1, marginBottom:16, color:`${primary}20` }}>"</div>
               <p style={{ color:'#374151', fontSize:'1rem', lineHeight:1.7, marginBottom:28, fontStyle:'italic' }}>"{t.text}"</p>
