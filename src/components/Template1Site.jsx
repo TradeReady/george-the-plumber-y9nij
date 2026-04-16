@@ -28,13 +28,17 @@ export default function Template1Site({ site, imagePack }) {
   };
   const heroImage = getHeroImage();
 
-  // Navbar scroll effect
+  // Navbar scroll + mobile menu
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', h);
-    return () => window.removeEventListener('scroll', h);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    onResize();
+    window.addEventListener('scroll', onScroll);
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onResize); };
   }, []);
 
   // Stats count-up — rAF + ease-out cubic for smooth deceleration
@@ -106,27 +110,61 @@ export default function Template1Site({ site, imagePack }) {
     <div style={{ fontFamily: fontStyle, backgroundColor: bg, color: textColor }}>
       {/* ── NAVBAR ── */}
       <nav style={{ position:'fixed', top:0, left:0, right:0, zIndex:100, transition:'all 0.3s',
-        backgroundColor: scrolled ? textColor : 'transparent',
+        backgroundColor: (scrolled || menuOpen) ? textColor : 'transparent',
         boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.15)' : 'none' }}>
         <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 24px', display:'flex', alignItems:'center', justifyContent:'space-between', height:64 }}>
           <div style={{ fontWeight:700, fontSize:'1.1rem', color:'#fff' }}>
             {logoUrl ? <img src={logoUrl} alt={businessName} style={{ height:32, objectFit:'contain' }} /> : businessName}
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:24 }}>
-            {navLinks.map(([l,h]) => <a key={h} href={h} style={{ fontSize:'0.875rem', color:'rgba(255,255,255,0.8)', textDecoration:'none' }}>{l}</a>)}
-          </div>
+          {/* Desktop nav links */}
+          {!isMobile && (
+            <div style={{ display:'flex', alignItems:'center', gap:24 }}>
+              {navLinks.map(([l,h]) => <a key={h} href={h} style={{ fontSize:'0.875rem', color:'rgba(255,255,255,0.8)', textDecoration:'none' }}>{l}</a>)}
+            </div>
+          )}
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-            {gc.phone && (
+            {!isMobile && gc.phone && (
               <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z"/></svg>
                 Call Now
               </a>
             )}
-            <a href="#contact" style={{ display:'inline-flex', padding:'8px 16px', backgroundColor:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>
-              {gc.cta_text || 'Get a Quote'}
-            </a>
+            {!isMobile && (
+              <a href="#contact" style={{ display:'inline-flex', padding:'8px 16px', backgroundColor:'rgba(255,255,255,0.15)', color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>
+                {gc.cta_text || 'Get a Quote'}
+              </a>
+            )}
+            {/* Hamburger */}
+            {isMobile && (
+              <button onClick={() => setMenuOpen(v => !v)} style={{ background:'none', border:'none', cursor:'pointer', padding:8, color:'#fff', display:'flex', alignItems:'center' }}>
+                {menuOpen
+                  ? <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                }
+              </button>
+            )}
           </div>
         </div>
+        {/* Mobile dropdown menu */}
+        {isMobile && menuOpen && (
+          <div style={{ backgroundColor:textColor, borderTop:'1px solid rgba(255,255,255,0.1)', padding:'16px 24px', display:'flex', flexDirection:'column', gap:4 }}>
+            {navLinks.map(([l,h]) => (
+              <a key={h} href={h} onClick={() => setMenuOpen(false)}
+                style={{ fontSize:'1rem', color:'rgba(255,255,255,0.85)', textDecoration:'none', padding:'12px 0', borderBottom:'1px solid rgba(255,255,255,0.08)', fontWeight:500 }}>{l}</a>
+            ))}
+            <div style={{ paddingTop:12, display:'flex', flexDirection:'column', gap:8 }}>
+              {gc.phone && (
+                <a href={`tel:${gc.phone}`} style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:6, padding:'12px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z"/></svg>
+                  Call Now
+                </a>
+              )}
+              <a href="#contact" onClick={() => setMenuOpen(false)} style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'12px', backgroundColor:'rgba(255,255,255,0.1)', color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>
+                {gc.cta_text || 'Get a Quote'}
+              </a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* ── HERO ── */}
