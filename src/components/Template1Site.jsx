@@ -37,42 +37,48 @@ export default function Template1Site({ site, imagePack }) {
     return () => window.removeEventListener('scroll', h);
   }, []);
 
-  // Stats count-up
-  function CountUp({ value }) {
+  // Stats count-up — rAF + ease-out cubic for smooth deceleration
+  function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
     const [display, setDisplay] = useState('0');
-    const started = useRef(false);
+    const rafRef = useRef(null);
+    const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
+      const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+      const isFloat = match[2].includes('.');
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setDisplay(`${prefix}0${suffix}`);
+      const easeOut = t => 1 - Math.pow(1 - t, 3);
+      const startAnimation = () => {
+        const startTime = performance.now();
+        const tick = (now) => {
+          const elapsed = now - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          const current = num * easeOut(progress);
+          if (progress < 1) {
+            setDisplay(`${prefix}${isFloat ? current.toFixed(1) : Math.floor(current)}${suffix}`);
+            rafRef.current = requestAnimationFrame(tick);
+          } else {
+            setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`);
+          }
+        };
+        rafRef.current = requestAnimationFrame(tick);
+      };
+      if (observerRef.current) observerRef.current.disconnect();
       const el = ref.current;
       if (!el) return;
-      const observer = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting && !started.current) {
-          started.current = true;
-          const prefix = match[1];
-          const num = parseFloat(match[2]);
-          const suffix = match[3];
-          const isFloat = match[2].includes('.');
-          const steps = 50;
-          const stepTime = 1500 / steps;
-          let step = 0;
-          const timer = setInterval(() => {
-            step++;
-            const cur = (num * step) / steps;
-            if (step >= steps) {
-              clearInterval(timer);
-              setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`);
-            } else {
-              setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`);
-            }
-          }, stepTime);
-        }
-      }, { threshold: 0.3 });
-      observer.observe(el);
-      return () => observer.disconnect();
-    }, [value]);
+      observerRef.current = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) { observerRef.current.disconnect(); startAnimation(); }
+      }, { threshold: 0.2 });
+      observerRef.current.observe(el);
+      return () => {
+        if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        if (observerRef.current) observerRef.current.disconnect();
+      };
+    }, [value, duration]);
     return <span ref={ref}>{display}</span>;
   }
 
@@ -135,7 +141,7 @@ export default function Template1Site({ site, imagePack }) {
                 <div style={{ height:2, width:40, marginTop:6, borderRadius:2, backgroundColor:primary }} />
               </motion.div>
             )}
-            <motion.h1 initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.6, delay:0.1 }}
+            <motion.h1 initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.8, delay:0.1, ease:[0.2,0.8,0.2,1] }}
               style={{ fontSize:'clamp(2rem,6vw,3.75rem)', fontWeight:800, color:'#fff', lineHeight:1.1, marginBottom:16, fontFamily:fontStyle }}>
               {gc.headline || businessName}
             </motion.h1>
@@ -178,7 +184,7 @@ export default function Template1Site({ site, imagePack }) {
       <section style={{ backgroundColor:'#fff', padding:'48px 0' }}>
         <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 24px', display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:24 }}>
           {statsData.map((s,i) => (
-            <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.1 }} style={{ textAlign:'center' }}>
+            <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay:i*0.12, ease:[0.2,0.8,0.2,1] }} style={{ textAlign:'center' }}>
               <div style={{ fontSize:'2.25rem', fontWeight:800, color:primary, marginBottom:4 }}>
                 <CountUp value={s.value} />
               </div>
