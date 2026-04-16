@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Template1Site({ site, imagePack }) {
   const gc = site.generated_content || {};
@@ -43,29 +43,40 @@ export default function Template1Site({ site, imagePack }) {
     const [display, setDisplay] = useState('0');
     const started = useRef(false);
     useEffect(() => {
-      const match = String(value).match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
-      if (!match) { setDisplay(value); return; }
-      const el = ref.current; if (!el) return;
+      const str = String(value);
+      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      if (!match) { setDisplay(str); return; }
+      const el = ref.current;
+      if (!el) return;
       const observer = new IntersectionObserver(([entry]) => {
         if (entry.isIntersecting && !started.current) {
           started.current = true;
-          const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+          const prefix = match[1];
+          const num = parseFloat(match[2]);
+          const suffix = match[3];
           const isFloat = match[2].includes('.');
-          const steps = 40; const stepTime = 1500 / steps; let step = 0;
+          const steps = 50;
+          const stepTime = 1500 / steps;
+          let step = 0;
           const timer = setInterval(() => {
             step++;
             const cur = (num * step) / steps;
-            if (step >= steps) { clearInterval(timer); setDisplay(`${prefix}${isFloat ? num.toFixed(1) : num}${suffix}`); }
-            else { setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`); }
+            if (step >= steps) {
+              clearInterval(timer);
+              setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`);
+            } else {
+              setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`);
+            }
           }, stepTime);
         }
-      }, { threshold: 0.1 });
+      }, { threshold: 0.3 });
       observer.observe(el);
       return () => observer.disconnect();
     }, [value]);
     return <span ref={ref}>{display}</span>;
   }
 
+  const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name: '', phone: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const handleSubmit = async (e) => {
@@ -187,23 +198,42 @@ export default function Template1Site({ site, imagePack }) {
               <p style={{ color:'#6b7280', maxWidth:480, margin:'0 auto', fontSize:'0.9rem' }}>From emergency repairs to major installations — we handle it all.</p>
             </motion.div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:20 }}>
-              {services.map((svc, i) => {
-                const img = (site.service_image_urls||[])[i] || (imagePack?.service_image_urls||[])[i];
-                return (
-                  <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.07 }}
-                    style={{ backgroundColor:'#fff', borderRadius:12, border:'1px solid #f3f4f6', overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.05)' }}>
-                    {img ? <img src={img} alt={svc.title} style={{ width:'100%', height:160, objectFit:'cover' }} /> :
-                      <div style={{ width:'100%', height:160, backgroundColor:`${primary}12`, display:'flex', alignItems:'center', justifyContent:'center' }}>
-                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={primary} strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                      </div>}
-                    <div style={{ padding:16 }}>
-                      <h3 style={{ margin:'0 0 8px', color:textColor, fontSize:'1rem', fontWeight:600 }}>{svc.title}</h3>
-                      <p style={{ margin:0, color:'#6b7280', fontSize:'0.875rem', lineHeight:1.6 }}>{svc.description}</p>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              <AnimatePresence>
+                {(showAllServices ? services : services.slice(0, 3)).map((svc, i) => {
+                  const img = (site.service_image_urls||[])[i] || (imagePack?.service_image_urls||[])[i];
+                  return (
+                    <motion.div key={i}
+                      initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }}
+                      whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.07 }}
+                      whileHover={{ y:-4 }}
+                      style={{ backgroundColor:'#fff', borderRadius:12, border:'1px solid #f3f4f6', overflow:'hidden', boxShadow:'0 1px 3px rgba(0,0,0,0.05)' }}>
+                      {img ? <img src={img} alt={svc.title} style={{ width:'100%', height:160, objectFit:'cover' }} /> :
+                        <div style={{ width:'100%', height:160, backgroundColor:`${primary}12`, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={primary} strokeWidth="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </div>}
+                      <div style={{ padding:16 }}>
+                        <h3 style={{ margin:'0 0 8px', color:textColor, fontSize:'1rem', fontWeight:600 }}>{svc.title}</h3>
+                        <p style={{ margin:0, color:'#6b7280', fontSize:'0.875rem', lineHeight:1.6 }}>{svc.description}</p>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
+            {services.length > 3 && (
+              <div style={{ textAlign:'center', marginTop:40 }}>
+                <button
+                  onClick={() => setShowAllServices(v => !v)}
+                  style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:9999, border:`2px solid ${primary}`, backgroundColor:'transparent', color:primary, fontWeight:600, fontSize:'0.875rem', cursor:'pointer' }}
+                >
+                  {showAllServices ? (
+                    <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="18 15 12 9 6 15"/></svg>Show Less</>
+                  ) : (
+                    <><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>See All Services</>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         </section>
       )}
