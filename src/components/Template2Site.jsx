@@ -287,9 +287,9 @@ export default function Template2Site({ site, imagePack }) {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" style={{ padding:'96px 0', background:bg }}>
-        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'start' }}>
+      <section id="contact" style={{ padding:'80px 0', background:bg, overflow:'hidden' }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 16px' }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 64, alignItems:'start' }}>
             <motion.div initial={{ opacity:0, x:-20 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
               <span style={{ fontSize:'0.75rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:primary, display:'block', marginBottom:8 }}>Get In Touch</span>
               <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:'#111827', marginBottom:16 }}>Ready to Get Started?</h2>
@@ -334,8 +334,8 @@ export default function Template2Site({ site, imagePack }) {
 
       {/* FOOTER */}
       <footer style={{ background:'#030712', color:'#9ca3af', padding:'56px 0' }}>
-        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'5fr 3fr 2fr 3fr', gap:32, marginBottom:40 }}>
+        <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 16px' }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '5fr 3fr 2fr 3fr', gap:32, marginBottom:40 }}>
             <div>
               <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
                 <div style={{ width:32, height:32, borderRadius:8, background:primary, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700 }}>{businessName.charAt(0)}</div>
