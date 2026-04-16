@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, ArrowRight, CheckCircle, Star, Quote, Award, Users, Clock, ChevronRight, Menu, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, Mail, MapPin, ArrowRight, CheckCircle, Star, Quote, Award, Users, Clock, ChevronRight, ChevronDown, ChevronUp, Menu, X } from 'lucide-react';
 
 export default function Template2Site({ site, imagePack }) {
   const gc = site.generated_content || {};
@@ -15,8 +15,38 @@ export default function Template2Site({ site, imagePack }) {
   const testimonials = gc.testimonials || [];
   const benefits = gc.benefits || [];
   const [open, setOpen] = useState(false);
+  const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
+
+  function CountUp({ value }) {
+    const ref = useRef(null);
+    const [display, setDisplay] = useState('0');
+    const started = useRef(false);
+    useEffect(() => {
+      const str = String(value);
+      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
+      if (!match) { setDisplay(str); return; }
+      const el = ref.current; if (!el) return;
+      const observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
+          const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
+          const isFloat = match[2].includes('.');
+          const steps = 50; const stepTime = 1500 / steps; let step = 0;
+          const timer = setInterval(() => {
+            step++;
+            const cur = (num * step) / steps;
+            if (step >= steps) { clearInterval(timer); setDisplay(`${prefix}${isFloat ? num.toFixed(1) : Math.round(num)}${suffix}`); }
+            else { setDisplay(`${prefix}${isFloat ? cur.toFixed(1) : Math.floor(cur)}${suffix}`); }
+          }, stepTime);
+        }
+      }, { threshold: 0.3 });
+      observer.observe(el);
+      return () => observer.disconnect();
+    }, [value]);
+    return <span ref={ref}>{display}</span>;
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -106,21 +136,31 @@ export default function Template2Site({ site, imagePack }) {
             <a href="#contact" style={{ color:primary, fontSize:'0.875rem', fontWeight:600, display:'flex', alignItems:'center', gap:4 }}>View all <ArrowRight size={14} /></a>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:24 }}>
-            {services.map((svc,i)=>{
-              const img=(site.service_image_urls||[])[i]||(imagePack?.service_image_urls||[])[i];
-              return (
-                <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ delay:i*0.06 }}
-                  style={{ background:'#f9fafb', borderRadius:20, padding:24, position:'relative', overflow:'hidden' }}>
-                  {img ? <div style={{ height:200, borderRadius:16, overflow:'hidden', marginBottom:16 }}><img src={img} alt={svc.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} /></div>
-                    : <div style={{ width:48, height:48, borderRadius:12, background:primary, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16, color:'#fff' }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                      </div>}
-                  <h3 style={{ fontWeight:700, color:'#111827', marginBottom:8 }}>{svc.title}</h3>
-                  <p style={{ fontSize:'0.875rem', color:'#6b7280', lineHeight:1.6 }}>{svc.description}</p>
-                </motion.div>
-              );
-            })}
+            <AnimatePresence>
+              {(showAllServices ? services : services.slice(0,3)).map((svc,i)=>{
+                const img=(site.service_image_urls||[])[i]||(imagePack?.service_image_urls||[])[i];
+                return (
+                  <motion.div key={i} initial={{ opacity:0, y:20 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:20 }} viewport={{ once:true }} transition={{ delay:i*0.06 }}
+                    style={{ background:'#f9fafb', borderRadius:20, padding:24, position:'relative', overflow:'hidden' }}>
+                    {img ? <div style={{ height:200, borderRadius:16, overflow:'hidden', marginBottom:16 }}><img src={img} alt={svc.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} /></div>
+                      : <div style={{ width:48, height:48, borderRadius:12, background:primary, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:16, color:'#fff' }}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        </div>}
+                    <h3 style={{ fontWeight:700, color:'#111827', marginBottom:8 }}>{svc.title}</h3>
+                    <p style={{ fontSize:'0.875rem', color:'#6b7280', lineHeight:1.6 }}>{svc.description}</p>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           </div>
+          {services.length > 3 && (
+            <div style={{ textAlign:'center', marginTop:40 }}>
+              <button onClick={() => setShowAllServices(v => !v)}
+                style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:9999, border:`2px solid ${primary}`, backgroundColor:'transparent', color:primary, fontWeight:600, fontSize:'0.875rem', cursor:'pointer' }}>
+                {showAllServices ? <><ChevronUp size={16} />Show Less</> : <><ChevronDown size={16} />See All Services</>}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -130,10 +170,10 @@ export default function Template2Site({ site, imagePack }) {
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'center' }}>
             <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:32 }}>
-                {[{Icon:Award,val:gc.years_in_business||'10+',sub:'Experience'},{Icon:Users,val:(gc.review_count||'500')+'+',sub:'Happy Clients'},{Icon:Clock,val:'<1hr',sub:'Response'}].map(({Icon,val,sub},i)=>(
+                {[{Icon:Award,val:gc.years_in_business ? gc.years_in_business+'+' : '10+',sub:'Experience'},{Icon:Users,val:(gc.review_count||'500')+'+',sub:'Happy Clients'},{Icon:Clock,val:'<1hr',sub:'Response'}].map(({Icon,val,sub},i)=>(
                   <div key={i} style={{ textAlign:'center', padding:20, background:'#fff', borderRadius:16, boxShadow:'0 1px 3px rgba(0,0,0,0.06)' }}>
                     <Icon size={20} style={{ color:primary, margin:'0 auto 8px' }} />
-                    <div style={{ fontSize:'1.5rem', fontWeight:800, color:'#111827' }}>{val}</div>
+                    <div style={{ fontSize:'1.5rem', fontWeight:800, color:'#111827' }}><CountUp value={val} /></div>
                     <div style={{ fontSize:'0.75rem', color:'#9ca3af', marginTop:2 }}>{sub}</div>
                   </div>
                 ))}
