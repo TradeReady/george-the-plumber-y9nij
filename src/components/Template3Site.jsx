@@ -16,7 +16,7 @@ export default function Template3Site({ site, imagePack }) {
   const testimonials = (gc.testimonials || []).slice(0, 3);
   const benefits = (gc.benefits || []).slice(0, 4);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
@@ -28,6 +28,31 @@ export default function Template3Site({ site, imagePack }) {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // GA4 — Template 3
+  const measurementId3 = site.ga_measurement_id || '';
+  useEffect(() => {
+    if (!measurementId3) return;
+    const e1=document.getElementById('ga-script-1'); if(e1)e1.remove();
+    const e2=document.getElementById('ga-script-2'); if(e2)e2.remove();
+    const s1=document.createElement('script'); s1.id='ga-script-1'; s1.async=true;
+    s1.src=`https://www.googletagmanager.com/gtag/js?id=${measurementId3}`;
+    document.head.appendChild(s1);
+    const s2=document.createElement('script'); s2.id='ga-script-2';
+    s2.innerHTML=`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${measurementId3}',{page_title:document.title,page_location:window.location.href,send_page_view:true});`;
+    document.head.appendChild(s2);
+    return () => { const r1=document.getElementById('ga-script-1'); const r2=document.getElementById('ga-script-2'); if(r1)r1.remove(); if(r2)r2.remove(); };
+  }, [measurementId3]);
+  useEffect(() => {
+    if (!measurementId3) return;
+    [25,50,75,90].forEach(m => { window[`scrollTracked${m}`]=false; });
+    const track = () => {
+      const pct=Math.round((window.scrollY/(document.body.scrollHeight-window.innerHeight))*100);
+      [25,50,75,90].forEach(m => { if(pct>=m&&!window[`scrollTracked${m}`]){window[`scrollTracked${m}`]=true;if(window.gtag)window.gtag('event','scroll_depth',{event_category:'engagement',event_label:`${m}_percent`,business_name:businessName});} });
+    };
+    window.addEventListener('scroll',track,{passive:true});
+    return () => window.removeEventListener('scroll',track);
+  }, [measurementId3]);
+
   function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
     const [display, setDisplay] = useState('0');
@@ -35,7 +60,7 @@ export default function Template3Site({ site, imagePack }) {
     const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
       const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
       const isFloat = match[2].includes('.');
@@ -75,6 +100,7 @@ export default function Template3Site({ site, imagePack }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+    if (window.gtag) window.gtag('event','form_submission',{event_category:'conversion',event_label:'contact_form',business_name:businessName});
     try { await fetch(`https://api.base44.com/api/apps/${site.app_id||''}/functions/submitPublicLead`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...form,website_id:site.id}) }); } catch(_) {}
   };
 
@@ -95,7 +121,10 @@ export default function Template3Site({ site, imagePack }) {
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             {!isMobile && gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 16px', fontSize:'0.875rem', fontWeight:900, color:'#fff', backgroundColor:primary, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
             {!isMobile && <a href="#contact" style={{ padding:'8px 20px', fontSize:'0.875rem', fontWeight:900, color:'rgba(255,255,255,0.8)', border:'1px solid rgba(255,255,255,0.2)', borderRadius:buttonRadius, textDecoration:'none' }}>Free Quote →</a>}
-            {/* Hamburger */}
+            {/* Mobile Call Now + Hamburger */}
+            {isMobile && gc.phone && (
+              <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', fontSize:'0.8rem', fontWeight:900, color:'#fff', backgroundColor:primary, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={12} /> Call Now</a>
+            )}
             {isMobile && (
               <button onClick={() => setMenuOpen(v => !v)} style={{ background:'none', border:'none', cursor:'pointer', padding:8, color:'#fff', display:'flex', alignItems:'center' }}>
                 {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -119,15 +148,15 @@ export default function Template3Site({ site, imagePack }) {
       </nav>
 
       {/* HERO */}
-      <section style={{ display:'flex', flexDirection:'row', minHeight:420, paddingTop:56, backgroundColor:bg }}>
-        <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'48px 64px' }}>
+      <section style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'auto' : 420, paddingTop:56, backgroundColor:bg }}>
+        <div style={{ flex:1, display:'flex', flexDirection:'column', justifyContent:'space-between', padding: isMobile ? '40px 20px' : '48px 64px' }}>
           <div>
             {gc.tagline && <motion.p initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ fontSize:'0.75rem', fontWeight:700, letterSpacing:'0.25em', textTransform:'uppercase', color:'#6b7280', marginBottom:20 }}>{gc.tagline}</motion.p>}
             <motion.h1 initial={{ opacity:0, y:30 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.5 }} style={{ fontSize:'clamp(2rem,5vw,3.2rem)', fontWeight:900, color:'#111827', lineHeight:1.05, letterSpacing:'-0.02em', marginBottom:20 }}>{gc.headline||businessName}</motion.h1>
             <motion.p initial={{ opacity:0, y:15 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.2 }} style={{ fontSize:'1rem', color:'#6b7280', lineHeight:1.6, maxWidth:380, marginBottom:32 }}>{gc.subheadline}</motion.p>
-            <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3 }} style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-              <a href="#contact" style={{ display:'inline-flex', alignItems:'center', padding:'12px 24px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:700, borderRadius:buttonRadius }}>{gc.cta_text||'Get a Free Quote'}</a>
-              {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 24px', backgroundColor:'#fff', color:'#1f2937', border:'2px solid #ccc', fontSize:'0.875rem', fontWeight:700, borderRadius:buttonRadius }}><Phone size={16} /> Call Now</a>}
+            <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.3 }} style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', gap:12, width: isMobile ? '100%' : 'auto' }}>
+              <a href="#contact" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', padding:'12px 24px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:700, borderRadius:buttonRadius, width: isMobile ? '100%' : 'auto' }}>{gc.cta_text||'Get a Free Quote'}</a>
+              {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:8, padding:'12px 24px', backgroundColor:'#fff', color:'#1f2937', border:'2px solid #ccc', fontSize:'0.875rem', fontWeight:700, borderRadius:buttonRadius, width: isMobile ? '100%' : 'auto' }}><Phone size={16} /> Call Now</a>}
             </motion.div>
           </div>
           <div style={{ display:'flex', gap:40, paddingTop:32, borderTop:'1px solid #d1d5db', marginTop:40 }}>
@@ -139,20 +168,20 @@ export default function Template3Site({ site, imagePack }) {
             ))}
           </div>
         </div>
-        <div style={{ position:'relative', width:'45%' }}>
+        {!isMobile && <div style={{ position:'relative', width:'45%' }}>
           <img src={heroImg} alt={businessName} style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
           <div style={{ position:'absolute', top:0, left:0, bottom:0, width:6, backgroundColor:primary }} />
           <div style={{ position:'absolute', bottom:0, left:6, right:0, padding:20, background:'linear-gradient(to top, rgba(0,0,0,0.7), transparent)' }}>
             <div style={{ color:'#fff', fontWeight:700, fontSize:'0.9rem' }}>{businessName}</div>
             {gc.address && <div style={{ color:'rgba(255,255,255,0.7)', fontSize:'0.8rem', marginTop:2 }}>{gc.address}</div>}
           </div>
-        </div>
+        </div>}
       </section>
 
       {/* SERVICES */}
       <section id="services" style={{ backgroundColor:bg }}>
-        <div style={{ backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', padding:'20px 64px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <h2 style={{ fontSize:'1.5rem', fontWeight:900, color:'#111827', textTransform:'uppercase', letterSpacing:'-0.01em' }}>Our Services</h2>
+        <div style={{ backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', padding: isMobile ? '16px 20px' : '20px 64px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.5rem', fontWeight:900, color:'#111827', textTransform:'uppercase', letterSpacing:'-0.01em' }}>Our Services</h2>
           <a href="#contact" style={{ fontSize:'0.75rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.15em', color:primary }}>Book Any Service →</a>
         </div>
         <div style={{ borderTop:'1px solid #e5e7eb' }}>
@@ -165,15 +194,15 @@ export default function Template3Site({ site, imagePack }) {
                   style={{ display:'flex', alignItems:'center', backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', cursor:'pointer', transition:'background-color 0.3s' }}
                   onMouseEnter={e=>e.currentTarget.style.backgroundColor=primary}
                   onMouseLeave={e=>e.currentTarget.style.backgroundColor='#fff'}>
-                  <div style={{ width:96, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 0', borderRight:'1px solid #f3f4f6' }}>
-                    <span style={{ fontSize:'2rem', fontWeight:900, color:'#e5e7eb', letterSpacing:'-0.04em' }}>{String(i+1).padStart(2,'0')}</span>
-                  </div>
-                  <div style={{ flex:1, padding:32 }}>
+                  {!isMobile && <div style={{ width:96, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', padding:'32px 0', borderRight:'1px solid #f3f4f6' }}>
+                   <span style={{ fontSize:'2rem', fontWeight:900, color:'#e5e7eb', letterSpacing:'-0.04em' }}>{String(i+1).padStart(2,'0')}</span>
+                  </div>}
+                  <div style={{ flex:1, padding: isMobile ? '20px 16px' : 32 }}>
                     <h3 style={{ fontSize:'1.1rem', fontWeight:900, color:'#111827', margin:'0 0 6px' }}>{svc.title}</h3>
                     <p style={{ fontSize:'0.875rem', color:'#6b7280', margin:0, lineHeight:1.6, maxWidth:480 }}>{svc.description}</p>
                   </div>
-                  {imgUrl && <div style={{ width:128, flexShrink:0, overflow:'hidden' }}><img src={imgUrl} alt={svc.title} style={{ width:128, height:96, objectFit:'cover' }} /></div>}
-                  <div style={{ width:64, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  {!isMobile && imgUrl && <div style={{ width:128, flexShrink:0, overflow:'hidden' }}><img src={imgUrl} alt={svc.title} style={{ width:128, height:96, objectFit:'cover' }} /></div>}
+                  <div style={{ width: isMobile ? 36 : 64, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <span style={{ fontSize:'1.25rem', color:'#d1d5db' }}>→</span>
                   </div>
                 </motion.div>
@@ -183,7 +212,7 @@ export default function Template3Site({ site, imagePack }) {
         </div>
         {services.length > 3 && (
           <div style={{ textAlign:'center', padding:'32px 0', backgroundColor:'#fff', borderTop:'1px solid #e5e7eb' }}>
-            <button onClick={() => setShowAllServices(v => !v)}
+            <button onClick={() => { setShowAllServices(v => !v); if(window.gtag)window.gtag('event','view_all_services',{event_category:'engagement',event_label:'services_expand',business_name:businessName}); }}
               style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:9999, border:`2px solid ${primary}`, backgroundColor:'transparent', color:primary, fontWeight:700, fontSize:'0.875rem', cursor:'pointer' }}>
               {showAllServices
                 ? <><ChevronUp size={16} />Show Less</>
@@ -195,20 +224,20 @@ export default function Template3Site({ site, imagePack }) {
 
       {/* ABOUT */}
       <section id="about" style={{ backgroundColor:bg }}>
-        <div style={{ display:'flex', flexDirection:'row', minHeight:500 }}>
-          <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ width:'40%', display:'flex', flexDirection:'column', justifyContent:'center', padding:'64px', backgroundColor:primary }}>
+        <div style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'auto' : 500 }}>
+          <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ width: isMobile ? '100%' : '40%', display:'flex', flexDirection:'column', justifyContent:'center', padding: isMobile ? '40px 20px' : '64px', backgroundColor:primary }}>
             <div style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.7rem', fontWeight:900, letterSpacing:'0.3em', textTransform:'uppercase', marginBottom:24 }}>About Us</div>
             <h2 style={{ fontSize:'clamp(1.8rem,3vw,3rem)', fontWeight:900, color:'#fff', lineHeight:1.05, letterSpacing:'-0.03em', marginBottom:32 }}>Built on trust.<br />Backed by results.</h2>
             <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'1rem', lineHeight:1.7 }}>{gc.about_text}</p>
           </motion.div>
           <motion.div initial={{ opacity:0, x:30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ flex:1, display:'flex', flexDirection:'column', divideY:'1px solid #f3f4f6' }}>
             {benefits.map((b, i) => (
-              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:24, padding:'40px 64px', borderBottom:'1px solid #f3f4f6' }}>
+              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:24, padding: isMobile ? '24px 20px' : '40px 64px', borderBottom:'1px solid #f3f4f6' }}>
                 <CheckCircle2 size={24} style={{ flexShrink:0, marginTop:2, color:primary }} />
                 <p style={{ color:'#1f2937', fontWeight:600, fontSize:'1rem', lineHeight:1.6 }}>{b}</p>
               </div>
             ))}
-            <div style={{ padding:'40px 64px' }}>
+            <div style={{ padding: isMobile ? '24px 20px' : '40px 64px' }}>
               <a href="#contact" style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'16px 32px', backgroundColor:primary, color:'#fff', fontSize:'0.875rem', fontWeight:900 }}>Work With Us →</a>
             </div>
           </motion.div>
@@ -217,8 +246,8 @@ export default function Template3Site({ site, imagePack }) {
 
       {/* TESTIMONIALS */}
       <section id="testimonials" style={{ backgroundColor:bg }}>
-        <div style={{ backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', padding:'20px 64px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-          <h2 style={{ fontSize:'1.5rem', fontWeight:900, color:'#111827', textTransform:'uppercase', letterSpacing:'-0.01em' }}>Customer Reviews</h2>
+        <div style={{ backgroundColor:'#fff', borderBottom:'1px solid #e5e7eb', padding: isMobile ? '16px 20px' : '20px 64px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.5rem', fontWeight:900, color:'#111827', textTransform:'uppercase', letterSpacing:'-0.01em' }}>Customer Reviews</h2>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <div style={{ display:'flex', gap:2 }}>
               {Array.from({length:5}).map((_,i)=><div key={i} style={{ width:10, height:10, borderRadius:'50%', backgroundColor: i<4 ? primary : `${primary}40` }} />)}
@@ -226,10 +255,10 @@ export default function Template3Site({ site, imagePack }) {
             <span style={{ fontSize:'0.875rem', fontWeight:900, color:'#374151' }}>{gc.rating||'4.9'}/5</span>
           </div>
         </div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', borderTop:'1px solid #e5e7eb' }}>
+        <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', borderTop:'1px solid #e5e7eb' }}>
           {testimonials.map((t, i) => (
             <motion.div key={i} initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }} viewport={{ once:true }} transition={{ duration:0.7, delay:i*0.12, ease:[0.2,0.8,0.2,1] }}
-              style={{ padding:'40px 64px', backgroundColor:bg, borderRight: i<2 ? '1px solid #e5e7eb' : 'none' }}>
+              style={{ padding: isMobile ? '32px 20px' : '40px 64px', backgroundColor:bg, borderRight: (!isMobile && i<2) ? '1px solid #e5e7eb' : 'none', borderBottom: isMobile ? '1px solid #e5e7eb' : 'none' }}>
               <div style={{ fontSize:'7rem', fontWeight:900, lineHeight:1, marginBottom:16, color:`${primary}20` }}>"</div>
               <p style={{ color:'#374151', fontSize:'1rem', lineHeight:1.7, marginBottom:28, fontStyle:'italic' }}>"{t.text}"</p>
               <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', borderTop:'1px solid #f3f4f6', paddingTop:20 }}>
@@ -248,7 +277,7 @@ export default function Template3Site({ site, imagePack }) {
       <section style={{ position:'relative', minHeight:256, display:'flex', alignItems:'center', overflow:'hidden' }}>
         <img src={bannerImg} alt="" style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover' }} />
         <div style={{ position:'absolute', inset:0, backgroundColor:textColor, opacity:0.88 }} />
-        <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:1280, margin:'0 auto', padding:'80px 64px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:40, flexWrap:'wrap' }}>
+        <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:1280, margin:'0 auto', padding: isMobile ? '48px 20px' : '80px 64px', display:'flex', flexDirection: isMobile ? 'column' : 'row', alignItems:'flex-start', justifyContent:'space-between', gap:32 }}>
           <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
             <div style={{ marginBottom:16, fontSize:'0.7rem', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.3em', color:'#fff' }}>Don't Wait</div>
             <h2 style={{ fontSize:'clamp(2rem,4vw,3rem)', fontWeight:900, color:'#fff', lineHeight:1.05, letterSpacing:'-0.03em' }}>Need Help Today?<br />We're Ready.</h2>
