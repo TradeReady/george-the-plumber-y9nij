@@ -27,7 +27,7 @@ export default function Template1Site({ site, imagePack }) {
   };
   const heroImage = getHeroImage();
 
-  // FIX 1: initialise isMobile correctly on first render
+  // FIX 1: isMobile initialised correctly on first render — prevents desktop flash on mobile
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(
@@ -46,7 +46,7 @@ export default function Template1Site({ site, imagePack }) {
     };
   }, []);
 
-  // FIX 2: CountUp regex backslashes restored
+  // FIX 2: CountUp regex — backslashes restored so number animation works
   function CountUp({ value, duration = 2000 }) {
     const ref = useRef(null);
     const [display, setDisplay] = useState('0');
@@ -145,6 +145,13 @@ export default function Template1Site({ site, imagePack }) {
                 {gc.cta_text || 'Get a Quote'}
               </a>
             )}
+            {/* FIX: on mobile show Call Now button AND hamburger in nav */}
+            {isMobile && gc.phone && (
+              <a href={`tel:${gc.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', backgroundColor: primary, color: '#fff', fontSize: '0.8rem', fontWeight: 600, borderRadius: buttonRadius, textDecoration: 'none' }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z" /></svg>
+                Call Now
+              </a>
+            )}
             {isMobile && (
               <button onClick={() => setMenuOpen(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 8, color: '#fff', display: 'flex', alignItems: 'center' }}>
                 {menuOpen
@@ -211,14 +218,16 @@ export default function Template1Site({ site, imagePack }) {
                 </span>
               ))}
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+            {/* FIX: hero buttons stack vertically on mobile, full width */}
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+              style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 12, width: isMobile ? '100%' : 'auto' }}>
               {gc.phone && (
-                <a href={`tel:${gc.phone}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 20px', color: '#fff', fontWeight: 600, fontSize: '0.875rem', border: '1px solid rgba(255,255,255,0.3)', borderRadius: buttonRadius, textDecoration: 'none', backdropFilter: 'blur(4px)' }}>
+                <a href={`tel:${gc.phone}`} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 20px', color: '#fff', fontWeight: 600, fontSize: '0.875rem', border: '1px solid rgba(255,255,255,0.3)', borderRadius: buttonRadius, textDecoration: 'none', backdropFilter: 'blur(4px)', width: isMobile ? '100%' : 'auto' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.6 1.21h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z" /></svg>
                   Call Now
                 </a>
               )}
-              <a href="#contact" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 20px', backgroundColor: primary, color: '#fff', fontWeight: 600, fontSize: '0.875rem', borderRadius: buttonRadius, textDecoration: 'none' }}>
+              <a href="#contact" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 20px', backgroundColor: primary, color: '#fff', fontWeight: 600, fontSize: '0.875rem', borderRadius: buttonRadius, textDecoration: 'none', width: isMobile ? '100%' : 'auto' }}>
                 {gc.cta_text || 'Get a Free Quote'}
               </a>
             </motion.div>
@@ -226,7 +235,7 @@ export default function Template1Site({ site, imagePack }) {
         </div>
       </section>
 
-      {/* STATS — FIX 3: 2 cols on mobile, 4 on desktop */}
+      {/* STATS — FIX: 2 cols on mobile, 4 on desktop */}
       <section style={{ backgroundColor: '#fff', padding: '48px 0' }}>
         <div style={{ maxWidth: 1152, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2,1fr)' : 'repeat(4,1fr)', gap: isMobile ? 16 : 24 }}>
           {statsData.map((s, i) => (
@@ -284,7 +293,7 @@ export default function Template1Site({ site, imagePack }) {
         </section>
       )}
 
-      {/* WHY US — FIX 4: single column on mobile */}
+      {/* WHY US — FIX: single column on mobile */}
       {benefits.length > 0 && (
         <section id="about" style={{ padding: '80px 0', backgroundColor: '#fff' }}>
           <div style={{ maxWidth: 1152, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 48, alignItems: 'center' }}>
@@ -449,10 +458,10 @@ export default function Template1Site({ site, imagePack }) {
         </div>
       </section>
 
-      {/* FOOTER */}
+      {/* FOOTER — FIX: single column on mobile */}
       <footer style={{ backgroundColor: textColor, color: 'rgba(255,255,255,0.7)', padding: '48px 0' }}>
         <div style={{ maxWidth: 1152, margin: '0 auto', padding: '0 16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '2fr 1fr 1fr 1fr', gap: 32, marginBottom: 32 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr', gap: isMobile ? 24 : 32, marginBottom: 32 }}>
             <div>
               <div style={{ fontWeight: 700, fontSize: '1.2rem', color: '#fff', marginBottom: 12 }}>{businessName}</div>
               <p style={{ fontSize: '0.875rem', lineHeight: 1.6 }}>{gc.tagline}</p>
