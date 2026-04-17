@@ -8,11 +8,16 @@ const site = {
     "https://base44.app/api/apps/69dd00d82d4b211b7a1d51c0/files/mp/public/69dd00d82d4b211b7a1d51c0/8fb500566_unnamed.webp"
   ],
   "style_name": "",
+  "call_tracking_enabled": false,
+  "callrail_company_id": null,
   "template_image_url": null,
   "template_name": "Template 1",
+  "call_tracking_number": null,
   "image_pack_id": "69de2eefa9123818c2132357",
   "vercel_url": "https://george-the-plumber-y9nij.vercel.app/",
+  "ga_measurement_id": null,
   "hero_image_url": null,
+  "call_notifications_enabled": false,
   "generated_content": {
     "benefits": [
       "24/7 Emergency Service",
@@ -34,7 +39,7 @@ const site = {
     "seo_description": null,
     "about_text": "George The Plumber has been providing top-notch plumbing services for over 73 years. Our commitment to quality and reliability ensures that your plumbing needs are met with expertise.",
     "years_in_business": "73",
-    "headline": "Reliabl Plumbing Services at Your Convenience",
+    "headline": "Reliable Plumbing Services at Your Convenience",
     "subheadline": "Quality plumbing solutions whenever you need them.",
     "email": "contact@georgetheplumber.com",
     "longitude": null,
@@ -101,10 +106,11 @@ const site = {
   "layout_structure": "NAV, HERO, STATS, SERVICES GRID, WHY CHOOSE US, TESTIMONIALS, LEAD FORM, CTA BANNER, FOOTER",
   "reference_image_urls": [],
   "slug": "george-the-plumber-y9nij",
+  "real_phone_number": null,
   "status": "viewed",
   "id": "69ddfba9ce6b446ef142b025",
   "created_date": "2026-04-14T08:32:41.207000",
-  "updated_date": "2026-04-15T14:13:06.383000",
+  "updated_date": "2026-04-17T12:11:13.220000",
   "created_by_id": "69dd00d82d4b211b7a1d51c1",
   "created_by": "cb.base44@gmail.com",
   "is_sample": false
