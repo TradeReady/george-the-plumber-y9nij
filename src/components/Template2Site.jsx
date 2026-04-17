@@ -15,7 +15,7 @@ export default function Template2Site({ site, imagePack }) {
   const testimonials = gc.testimonials || [];
   const benefits = gc.benefits || [];
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showAllServices, setShowAllServices] = useState(false);
   const [form, setForm] = useState({ name:'', phone:'', email:'', message:'' });
   const [submitted, setSubmitted] = useState(false);
@@ -34,7 +34,7 @@ export default function Template2Site({ site, imagePack }) {
     const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(d+.?d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
       const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
       const isFloat = match[2].includes('.');
@@ -74,6 +74,7 @@ export default function Template2Site({ site, imagePack }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true);
+    if (window.gtag) window.gtag('event','form_submission',{event_category:'conversion',event_label:'contact_form',business_name:businessName});
     try { await fetch(`https://api.base44.com/api/apps/${site.app_id||''}/functions/submitPublicLead`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({...form,website_id:site.id}) }); } catch(_) {}
   };
 
@@ -99,7 +100,10 @@ export default function Template2Site({ site, imagePack }) {
           <div style={{ display:'flex', alignItems:'center', gap:12 }}>
             {!isMobile && gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'8px 20px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={14} /> Call Now</a>}
             {!isMobile && <a href="#contact" style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'8px 20px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}>{gc.cta_text||'Get a Quote'} <ChevronRight size={14} /></a>}
-            {/* Hamburger */}
+            {/* Mobile Call Now + Hamburger */}
+            {isMobile && gc.phone && (
+              <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'7px 14px', background:primary, color:'#fff', fontSize:'0.8rem', fontWeight:600, borderRadius:buttonRadius, textDecoration:'none' }}><Phone size={12} /> Call Now</a>
+            )}
             {isMobile && (
               <button onClick={() => setMenuOpen(v => !v)} style={{ background:'none', border:'none', cursor:'pointer', padding:8, display:'flex', alignItems:'center', color:'#374151' }}>
                 {menuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -123,8 +127,8 @@ export default function Template2Site({ site, imagePack }) {
       </nav>
 
       {/* HERO */}
-      <section style={{ paddingTop:64, minHeight:'100vh', display:'grid', gridTemplateColumns:'1fr 1fr', background:'#fafafa' }}>
-        <div style={{ display:'flex', flexDirection:'column', justifyContent:'center', padding:'80px 64px' }}>
+      <section style={{ paddingTop:64, minHeight:'100vh', display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', background:'#fafafa' }}>
+        <div style={{ display:'flex', flexDirection:'column', justifyContent:'center', padding: isMobile ? '60px 20px 40px' : '80px 64px' }}>
           {gc.tagline && (
             <motion.div initial={{ opacity:0, x:-20 }} animate={{ opacity:1, x:0 }} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:24 }}>
               <div style={{ width:24, height:2, background:primary }} />
@@ -138,9 +142,9 @@ export default function Template2Site({ site, imagePack }) {
               {benefits.slice(0,3).map((b,i)=><li key={i} style={{ display:'flex', alignItems:'center', gap:8, fontSize:'0.875rem', color:'#374151', marginBottom:8 }}><span style={{ color:primary }}>✓</span>{b}</li>)}
             </ul>
           )}
-          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.4 }} style={{ display:'flex', gap:12, flexWrap:'wrap' }}>
-            <a href="#contact" style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'12px 24px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius }}>{gc.cta_text||'Get a Free Quote'} <ArrowRight size={14} /></a>
-            {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', gap:6, padding:'12px 24px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius }}><Phone size={14} /> Call Us</a>}
+          <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ delay:0.4 }} style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', gap:12, width: isMobile ? '100%' : 'auto' }}>
+            <a href="#contact" style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6, padding:'12px 24px', background:primary, color:'#fff', fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, width: isMobile ? '100%' : 'auto' }}>{gc.cta_text||'Get a Free Quote'} <ArrowRight size={14} /></a>
+            {gc.phone && <a href={`tel:${gc.phone}`} style={{ display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6, padding:'12px 24px', border:`1.5px solid ${primary}`, color:primary, fontSize:'0.875rem', fontWeight:600, borderRadius:buttonRadius, width: isMobile ? '100%' : 'auto' }}><Phone size={14} /> Call Us</a>}
           </motion.div>
           {gc.rating && (
             <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:32 }}>
@@ -156,7 +160,7 @@ export default function Template2Site({ site, imagePack }) {
             </div>
           )}
         </div>
-        <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ position:'relative' }}>
+        {!isMobile && <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} style={{ position:'relative' }}>
           <img src={heroImage} alt={businessName} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
           <div style={{ position:'absolute', bottom:32, left:32, right:32, background:'#fff', borderRadius:16, padding:20, boxShadow:'0 10px 40px rgba(0,0,0,0.12)' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
@@ -167,11 +171,11 @@ export default function Template2Site({ site, imagePack }) {
               <div style={{ width:40, height:40, borderRadius:'50%', background:primary, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff' }}><Phone size={16} /></div>
             </div>
           </div>
-        </motion.div>
+        </motion.div>}
       </section>
 
       {/* SERVICES */}
-      <section id="services" style={{ padding:'96px 0', background:'#fff' }}>
+      <section id="services" style={{ padding: isMobile ? '60px 0' : '96px 0', background:'#fff' }}>
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px' }}>
           <div style={{ display:'flex', alignItems:'flex-end', justifyContent:'space-between', marginBottom:56 }}>
             <div>
@@ -200,7 +204,7 @@ export default function Template2Site({ site, imagePack }) {
           </div>
           {services.length > 3 && (
             <div style={{ textAlign:'center', marginTop:40 }}>
-              <button onClick={() => setShowAllServices(v => !v)}
+              <button onClick={() => { setShowAllServices(v => !v); if(window.gtag)window.gtag('event','view_all_services',{event_category:'engagement',event_label:'services_expand',business_name:businessName}); }}
                 style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'12px 28px', borderRadius:9999, border:`2px solid ${primary}`, backgroundColor:'transparent', color:primary, fontWeight:600, fontSize:'0.875rem', cursor:'pointer' }}>
                 {showAllServices ? <><ChevronUp size={16} />Show Less</> : <><ChevronDown size={16} />See All Services</>}
               </button>
@@ -210,9 +214,9 @@ export default function Template2Site({ site, imagePack }) {
       </section>
 
       {/* ABOUT */}
-      <section id="about" style={{ padding:'96px 0', background:bg }}>
+      <section id="about" style={{ padding: isMobile ? '60px 0' : '96px 0', background:bg }}>
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 24px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:64, alignItems:'center' }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 64, alignItems:'center' }}>
             <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
               <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:32 }}>
                 {[{Icon:Award,val:gc.years_in_business ? gc.years_in_business+'+' : '10+',sub:'Experience'},{Icon:Users,val:(gc.review_count||'500')+'+',sub:'Happy Clients'},{Icon:Clock,val:'<1hr',sub:'Response'}].map(({Icon,val,sub},i)=>(
@@ -335,7 +339,7 @@ export default function Template2Site({ site, imagePack }) {
       {/* FOOTER */}
       <footer style={{ background:'#030712', color:'#9ca3af', padding:'56px 0' }}>
         <div style={{ maxWidth:1280, margin:'0 auto', padding:'0 16px' }}>
-          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : '5fr 3fr 2fr 3fr', gap:32, marginBottom:40 }}>
+          <div style={{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '5fr 3fr 2fr 3fr', gap: isMobile ? 24 : 32, marginBottom:40 }}>
             <div>
               <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:16 }}>
                 <div style={{ width:32, height:32, borderRadius:8, background:primary, display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontWeight:700 }}>{businessName.charAt(0)}</div>
