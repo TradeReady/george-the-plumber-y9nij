@@ -49,7 +49,7 @@ export default function Template1Site({ site, imagePack }) {
     const observerRef = useRef(null);
     useEffect(() => {
       const str = String(value);
-      const match = str.match(/^([^0-9]*)(d+\.?d*)([^0-9]*)$/);
+      const match = str.match(/^([^0-9]*)(\d+\.?\d*)([^0-9]*)$/);
       if (!match) { setDisplay(str); return; }
       const prefix = match[1], num = parseFloat(match[2]), suffix = match[3];
       const isFloat = match[2].includes('.');
