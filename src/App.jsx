@@ -39,7 +39,7 @@ const site = {
     "seo_description": null,
     "about_text": "George The Plumber has been providing top-notch plumbing services for over 73 years. Our commitment to quality and reliability ensures that your plumbing needs are met with expertise.",
     "years_in_business": "73",
-    "headline": "Reliable Plumbing Services at Your Convenience",
+    "headline": "Reliabl Plumbing Services at Your Convenience",
     "subheadline": "Quality plumbing solutions whenever you need them.",
     "email": "contact@georgetheplumber.com",
     "longitude": null,
@@ -110,7 +110,7 @@ const site = {
   "status": "viewed",
   "id": "69ddfba9ce6b446ef142b025",
   "created_date": "2026-04-14T08:32:41.207000",
-  "updated_date": "2026-05-11T11:12:43.748000",
+  "updated_date": "2026-05-11T11:28:59.131000",
   "created_by_id": "69dd00d82d4b211b7a1d51c1",
   "created_by": "cb.base44@gmail.com",
   "is_sample": false
