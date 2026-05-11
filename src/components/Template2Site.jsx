@@ -233,7 +233,7 @@ export default function Template2Site({ site, imagePack }) {
             </motion.div>
             <motion.div initial={{ opacity:0, x:30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
               <span style={{ fontSize:'0.75rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.15em', color:primary, display:'block', marginBottom:8 }}>Why Choose Us</span>
-              <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:'#111827', marginBottom:32 }}>The Experts You Can Trust</h2>
+              <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:'#111827', marginBottom:32 }}>{gc.why_us_headline || `The ${businessName} Difference`}</h2>
               {benefits.map((b,i)=>(
                 <div key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:16, background:'#fff', borderRadius:12, border:'1px solid #f3f4f6', marginBottom:12 }}>
                   <div style={{ width:24, height:24, borderRadius:'50%', background:`${primary}20`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, color:primary }}>✓</div>
