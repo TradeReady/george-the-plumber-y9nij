@@ -320,7 +320,7 @@ export default function Template1Site({ site, imagePack }) {
           <div style={{ maxWidth:1152, margin:'0 auto', padding:'0 24px', display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 32 : 48, alignItems:'center' }}>
             <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }}>
               <p style={{ fontSize:'0.75rem', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', color:primary, marginBottom:8 }}>Why Choose Us</p>
-              <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:textColor, marginBottom:16 }}>The {businessName} Difference</h2>
+              <h2 style={{ fontSize:'clamp(1.8rem,3vw,2.5rem)', fontWeight:800, color:textColor, marginBottom:16 }}>{gc.why_us_headline || `The ${businessName} Difference`}</h2>
               <p style={{ color:'#6b7280', marginBottom:24, lineHeight:1.7 }}>{gc.about_text}</p>
               <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
                 {benefits.map((b,i) => (
