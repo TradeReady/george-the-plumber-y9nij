@@ -227,7 +227,7 @@ export default function Template3Site({ site, imagePack }) {
         <div style={{ display:'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: isMobile ? 'auto' : 500 }}>
           <motion.div initial={{ opacity:0, x:-30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ width: isMobile ? '100%' : '40%', display:'flex', flexDirection:'column', justifyContent:'center', padding: isMobile ? '40px 20px' : '64px', backgroundColor:primary }}>
             <div style={{ color:'rgba(255,255,255,0.4)', fontSize:'0.7rem', fontWeight:900, letterSpacing:'0.3em', textTransform:'uppercase', marginBottom:24 }}>About Us</div>
-            <h2 style={{ fontSize:'clamp(1.8rem,3vw,3rem)', fontWeight:900, color:'#fff', lineHeight:1.05, letterSpacing:'-0.03em', marginBottom:32 }}>Built on trust.<br />Backed by results.</h2>
+            <h2 style={{ fontSize:'clamp(1.8rem,3vw,3rem)', fontWeight:900, color:'#fff', lineHeight:1.05, letterSpacing:'-0.03em', marginBottom:32 }}>{gc.why_us_headline || `The ${businessName} Difference`}</h2>
             <p style={{ color:'rgba(255,255,255,0.7)', fontSize:'1rem', lineHeight:1.7 }}>{gc.about_text}</p>
           </motion.div>
           <motion.div initial={{ opacity:0, x:30 }} whileInView={{ opacity:1, x:0 }} viewport={{ once:true }} style={{ flex:1, display:'flex', flexDirection:'column', divideY:'1px solid #f3f4f6' }}>
