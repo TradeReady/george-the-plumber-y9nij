@@ -110,7 +110,7 @@ const site = {
   "status": "viewed",
   "id": "69ddfba9ce6b446ef142b025",
   "created_date": "2026-04-14T08:32:41.207000",
-  "updated_date": "2026-05-11T10:48:34.689000",
+  "updated_date": "2026-05-11T11:03:04.478000",
   "created_by_id": "69dd00d82d4b211b7a1d51c1",
   "created_by": "cb.base44@gmail.com",
   "is_sample": false
