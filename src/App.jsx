@@ -20,10 +20,10 @@ const site = {
   "call_notifications_enabled": false,
   "generated_content": {
     "benefits": [
-      "24/7 Emergency Service",
-      "Highly Experienced Technicians",
-      "Customer Satisfaction Guaranteed",
-      "Transparent Pricing",
+      "24/7 Emergency Servic",
+      "Highly Experienced Technician",
+      "Customer Satisfaction Guarantee",
+      "Transparent Pricin",
       "Wide Range of Plumbing Services"
     ],
     "street_address": null,
@@ -37,13 +37,13 @@ const site = {
     "address_region": null,
     "services_font": null,
     "seo_description": null,
-    "about_text": "George The Plumber has been providing top-notch plumbing services for over 73 years. Our commitment to quality and reliability ensures that your plumbing needs are met with expertise.",
+    "about_text": "George The Plumber has been providing top-notch plumbing services for over 73 years. Our commitment to quality and reliability ensures that your plumbing needs are met with expertis.",
     "years_in_business": "73",
     "headline": "Reliabl Plumbing Services at Your Convenience",
     "subheadline": "Quality plumbing solutions whenever you need them.",
     "email": "contact@georgetheplumber.com",
     "longitude": null,
-    "cta_text": "Get a Free Quote",
+    "cta_text": "Get a Free Quot",
     "address": "Wigan",
     "postcode": null,
     "services": [
@@ -110,7 +110,7 @@ const site = {
   "status": "viewed",
   "id": "69ddfba9ce6b446ef142b025",
   "created_date": "2026-04-14T08:32:41.207000",
-  "updated_date": "2026-05-13T11:53:03.925000",
+  "updated_date": "2026-05-13T11:54:01.995000",
   "created_by_id": "69dd00d82d4b211b7a1d51c1",
   "created_by": "cb.base44@gmail.com",
   "is_sample": false
