@@ -19,6 +19,7 @@ const site = {
   "hero_image_url": null,
   "call_notifications_enabled": false,
   "generated_content": {
+    "why_us_label": "Why Choose U",
     "benefits": [
       "24/7 Emergency Servic",
       "Highly Experienced Technician",
@@ -100,7 +101,8 @@ const site = {
     "tagline": "Reliable plumbing, anytime you need it!",
     "trade_type": null,
     "location": null,
-    "text_color": "#1e2a3a"
+    "text_color": "#1e2a3a",
+    "why_us_headline": "The George The Plumber Differenc"
   },
   "prompt": "Build me a fully functional, production-ready lead generation website for \"George The Plumber\" using React, Tailwind CSS, and Framer Motion animations.\n\n## Business Details\n- **Business Name:** George The Plumber\n- **Tagline:** Reliable plumbing, anytime you need it!\n- **Location:** Wigan\n- **Phone Number:** 07700122882\n- **Website:** \n- **Email:** \n- **Years in Business:** 73 years in business\n- **Star Rating:** 4 (97 reviews)\n- **Opening Hours:** Open 24 hours\n- **Services Offered:** Bathroom installation, Install hot-water cylinder, Install boiler, Repair tap, Repair water leak, Water removal\n- **Badges/Trust Signals:** 24/7 Emergency, Verified\n- **Facebook:** \n- **Instagram:** \n\n## Design Style\n- **Layout:** modern dark-themed layout with a full-bleed hero, diagonal section dividers, floating service cards, and an animated stats counter section\n- **Colour Scheme:** Midnight & Amber\n  - Background: #0f172a\n  - Accent / Primary: #e85d04\n  - Text / Contrast: #f8fafc\n\n## Required Sections (in order)\n1. **Sticky Navigation Bar** — logo left, nav links centre, \"Get a Free Quote\" CTA button right (accent colour). Smooth scroll to sections.\n2. **Hero Section** — Full-width with headline, subheading (tagline), star rating badge, trust badges, and TWO CTAs: \"Call Now\" + \"Get a Free Quote\". Add a subtle entrance animation (fade-up) using Framer Motion.\n3. **Services Grid** — 3-column grid (mobile: 1 col, tablet: 2 col) with icon, title, short description per service. Hover lift animation on cards.\n4. **Why Choose Us** — Split layout: left side bullet points / checklist, right side a stat block showing years in business, review count, and rating.\n5. **Testimonials** — 3 customer review cards with star ratings, quote, and author name. Carousel on mobile.\n6. **Lead Capture Form** — Full-width section with a prominent contact form (Name, Phone, Email, Message, Submit). Form should have field validation and a success state with a thank-you message.\n7. **Footer** — Dark background, logo, nav links, real contact details (phone: 07700122882, email: , address: Wigan), social links (Facebook: , Instagram: ), copyright.\n\n## Animations & Interactions\n- Use Framer Motion for: hero fade-up entrance, section reveal on scroll (useInView), card hover lift effects, and CTA button pulse animation.\n- Smooth scroll behaviour between sections.\n- Form field focus states with accent colour outline.\n\n## Technical Requirements\n- React functional components with hooks\n- Tailwind CSS for all styling (no inline styles except for dynamic colours)\n- Fully responsive (mobile-first)\n- All buttons and links must be functional (form submits, nav links scroll)\n- Use lucide-react for all icons\n\n## Colour Token Reference (use these exact values)\n```\nbackground: \"#0f172a\"\naccent: \"#e85d04\"\ntext: \"#f8fafc\"\naccent-hover: darken accent by 10%\n```\n\nBuild the complete, fully functional website now.",
   "layout_structure": "NAV, HERO, STATS, SERVICES GRID, WHY CHOOSE US, TESTIMONIALS, LEAD FORM, CTA BANNER, FOOTER",
@@ -110,7 +112,7 @@ const site = {
   "status": "viewed",
   "id": "69ddfba9ce6b446ef142b025",
   "created_date": "2026-04-14T08:32:41.207000",
-  "updated_date": "2026-05-13T12:17:38.435000",
+  "updated_date": "2026-05-13T12:29:37.354000",
   "created_by_id": "69dd00d82d4b211b7a1d51c1",
   "created_by": "cb.base44@gmail.com",
   "is_sample": false
